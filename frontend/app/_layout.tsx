@@ -55,6 +55,15 @@ export default function Layout() {
           }}
         />
         <Tabs.Screen
+          name="encyclopedia"
+          options={{
+            title: '図鑑',
+            tabBarIcon: ({ color, size }) => (
+              <Ionicons name="book-outline" size={size} color={color} />
+            ),
+          }}
+        />
+        <Tabs.Screen
           name="history"
           options={{
             title: '履歴',
