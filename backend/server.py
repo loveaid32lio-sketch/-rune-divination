@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter
+from fastapi import FastAPI, APIRouter, HTTPException
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -109,7 +109,7 @@ async def save_reading(reading: ReadingCreate):
     """Save a reading to history"""
     rune = next((r for r in RUNES if r["id"] == reading.rune_id), None)
     if not rune:
-        return {"error": "Rune not found"}
+        raise HTTPException(status_code=400, detail="Rune not found")
     
     interpretation = rune["upright"] if reading.position == "upright" else rune["reversed"]
     
