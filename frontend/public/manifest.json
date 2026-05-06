@@ -1,0 +1,26 @@
+{
+  "name": "ルーン占い - 一枚引き",
+  "short_name": "ルーン占い",
+  "description": "エルダーフサルク25文字のルーン占い一枚引きアプリ。成り立ちから意味を学べる図鑑付き。",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#06140D",
+  "theme_color": "#06140D",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/pwa-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/pwa-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["entertainment", "lifestyle"],
+  "lang": "ja"
+}

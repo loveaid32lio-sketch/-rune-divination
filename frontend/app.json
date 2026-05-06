@@ -21,7 +21,12 @@
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/favicon.png",
+      "name": "ルーン占い - 一枚引き",
+      "shortName": "ルーン占い",
+      "description": "エルダーフサルク25文字のルーン占い一枚引きアプリ。成り立ちから意味を学べる図鑑付き。",
+      "backgroundColor": "#06140D",
+      "themeColor": "#06140D"
     },
     "plugins": [
       "expo-router",
