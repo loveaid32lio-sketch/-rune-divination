@@ -1,0 +1,86 @@
+{
+  "theme": "DARK",
+  "archetype": "Archetype 5 (Jewel & Luxury)",
+  "emotional_tone": "Mysterious, ancient, premium, organic, luminous discovery",
+  "design_concept": "Glowing treasure hidden in a deep forest. Moody, cinematic lighting with high contrast gold/amber accents over dark emerald/obsidian tones.",
+  "colors": {
+    "background": "#06140D",
+    "surface": "#0A1A12",
+    "surface_glass": "rgba(10, 26, 18, 0.7)",
+    "primary": "#D4AF37",
+    "primary_glow": "rgba(212, 175, 55, 0.4)",
+    "text_primary": "#F4EFEA",
+    "text_secondary": "#A3B8AD",
+    "border_subtle": "rgba(212, 175, 55, 0.15)",
+    "border_highlight": "rgba(212, 175, 55, 0.5)"
+  },
+  "typography": {
+    "font_primary": "Cormorant Garamond, serif",
+    "font_secondary": "Manrope, sans-serif",
+    "scales": {
+      "h1": "text-4xl sm:text-5xl font-light tracking-tight text-[#D4AF37]",
+      "h2": "text-2xl sm:text-3xl font-normal tracking-tight text-[#F4EFEA]",
+      "h3": "text-xl sm:text-2xl text-[#D4AF37]",
+      "body": "text-base leading-relaxed text-[#F4EFEA]",
+      "small": "text-sm tracking-[0.2em] uppercase text-[#A3B8AD]"
+    }
+  },
+  "spacing_and_layout": {
+    "global_padding": "p-6 sm:p-8",
+    "container": "max-w-md mx-auto h-full flex flex-col",
+    "gap": "gap-8",
+    "surface_padding": "p-8",
+    "border_radius": "rounded-2xl"
+  },
+  "surfaces_and_micro_themes": {
+    "glass_card": "bg-[#0A1A12]/70 backdrop-blur-xl border border-[#D4AF37]/20 shadow-lg",
+    "rune_stone": "bg-[#06140D] border border-[#D4AF37]/50 shadow-[0_0_30px_rgba(212,175,55,0.2)] rounded-xl flex items-center justify-center",
+    "glowing_cta": "bg-transparent border border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-[#06140D] font-bold uppercase tracking-[0.2em] px-8 py-4 shadow-[0_0_15px_rgba(212,175,55,0.3)] transition-all duration-300"
+  },
+  "animations": {
+    "breathing_glow": "animate-pulse (customized duration 4s, fading opacity)",
+    "reveal": "Fade in and slight slide up (translate-y-4 to translate-y-0) duration-700 ease-out",
+    "draw_interaction": "active:scale-95 transition-transform"
+  },
+  "components": {
+    "header": {
+      "style": "fixed top-0 w-full z-50 bg-[#06140D]/80 backdrop-blur-xl border-b border-[#D4AF37]/10 py-4 px-6 flex justify-between items-center"
+    },
+    "rune_card_result": {
+      "style": "relative w-full aspect-[2/3] max-w-sm mx-auto bg-gradient-to-b from-[#14291E] to-[#0A1A12] border border-[#D4AF37]/40 rounded-2xl flex flex-col items-center justify-center p-8 shadow-[0_0_50px_rgba(212,175,55,0.15)]"
+    },
+    "history_item": {
+      "style": "flex flex-col p-6 mb-4 bg-[#0A1A12]/60 backdrop-blur-xl border border-[#D4AF37]/15 rounded-xl hover:border-[#D4AF37]/40 transition-colors"
+    }
+  },
+  "media": {
+    "image_urls": [
+      {
+        "url": "https://images.unsplash.com/photo-1670073952001-1aafed4bfc02?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1ODB8MHwxfHNlYXJjaHwyfHxkYXJrJTIwbXlzdGljYWwlMjBmb3Jlc3R8ZW58MHx8fHwxNzc4MDgzMjM1fDA&ixlib=rb-4.1.0&q=85",
+        "category": "background",
+        "description": "Dark mystical foggy forest. To be used as a full-screen fixed background with a heavy dark overlay (bg-[#06140D]/85) to create the deep forest atmosphere."
+      }
+    ]
+  },
+  "accessibility": {
+    "contrast": "Ensure white/gold text meets WCAG AA 4.5:1 against dark green backgrounds. Do not use gold for small body text.",
+    "reduce_motion": "Disable the breathing glow animation if prefers-reduced-motion is true.",
+    "test_attributes": [
+      "data-testid='draw-rune-button'",
+      "data-testid='rune-result-card'",
+      "data-testid='history-list'",
+      "data-testid='history-item'",
+      "data-testid='nav-history-button'",
+      "data-testid='nav-home-button'"
+    ]
+  },
+  "instructions_to_main_agent": [
+    "Set the background of the app to the Unsplash mystical forest image, with a fixed overlay of 'bg-[#06140D]/85' to heavily darken it and tint it deep green.",
+    "The central action is the 'Draw Rune' mechanic. Create a glowing, mystical center area on the Home screen. Avoid generic centered layouts everywhere else: use left-aligned, spacious layouts for the history list and text descriptions.",
+    "For the Rune itself, use standard text rendering (e.g., using Unicode Rune characters like ᚠ, ᚢ, ᚦ) or simple text. Make the rune character massive (text-7xl+) and color it Gold (#D4AF37) with a drop-shadow for the glowing effect.",
+    "The design must feel like a hidden luxury artifact in the woods. Do not use standard Vercel/Tailwind aesthetics. Rely on 'Crystal Glass' (backdrop-blur-xl with high opacity) for surfaces and pure gold for interactive highlights.",
+    "Implement the 25 Elder Futhark runes data structure (name, symbol, meaning, upright/reversed) using Unicode characters.",
+    "All interactive elements must include the specified data-testid attributes.",
+    "Do NOT use 'Inter' font. Import and use 'Cormorant Garamond' for headings/runes, and 'Manrope' for body text."
+  ]
+}
