@@ -21,6 +21,7 @@ interface RuneResult {
   symbol: string;
   name: string;
   meaning: string;
+  origin: string;
   interpretation: string;
 }
 
@@ -184,6 +185,12 @@ export default function HomeScreen() {
                   {/* Rune Name */}
                   <Text style={styles.runeName}>{result?.name}</Text>
                   <Text style={styles.runeMeaning}>{result?.meaning}</Text>
+
+                  {/* Origin Section */}
+                  <View style={styles.originSection}>
+                    <Text style={styles.originLabel}>成り立ち</Text>
+                    <Text style={styles.originText}>{result?.origin}</Text>
+                  </View>
 
                   {/* Divider */}
                   <View style={styles.divider} />
@@ -388,6 +395,29 @@ const styles = StyleSheet.create({
     color: '#A3B8AD',
     letterSpacing: 1,
     marginBottom: 20,
+  },
+  originSection: {
+    width: '100%',
+    backgroundColor: 'rgba(6, 20, 13, 0.6)',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(212, 175, 55, 0.12)',
+    padding: 16,
+    marginBottom: 20,
+  },
+  originLabel: {
+    fontFamily: 'Manrope_600SemiBold',
+    fontSize: 11,
+    color: '#D4AF37',
+    letterSpacing: 3,
+    textTransform: 'uppercase',
+    marginBottom: 10,
+  },
+  originText: {
+    fontFamily: 'Manrope_400Regular',
+    fontSize: 14,
+    color: '#F4EFEA',
+    lineHeight: 24,
   },
   divider: {
     width: 60,

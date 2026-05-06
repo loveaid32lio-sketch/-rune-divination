@@ -22,6 +22,7 @@ interface Reading {
   rune_symbol: string;
   rune_name: string;
   rune_meaning: string;
+  rune_origin: string;
   interpretation: string;
   timestamp: string;
 }
@@ -117,6 +118,8 @@ export default function HistoryScreen() {
         {isExpanded && (
           <View style={styles.cardExpanded}>
             <View style={styles.expandDivider} />
+            <Text style={styles.expandLabel}>成り立ち</Text>
+            <Text style={styles.expandOrigin}>{item.rune_origin}</Text>
             <Text style={styles.expandLabel}>意味</Text>
             <Text style={styles.expandMeaning}>{item.rune_meaning}</Text>
             <Text style={styles.expandLabel}>解釈</Text>
@@ -317,6 +320,13 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#A3B8AD',
     marginBottom: 12,
+  },
+  expandOrigin: {
+    fontFamily: 'Manrope_400Regular',
+    fontSize: 13,
+    color: '#F4EFEA',
+    lineHeight: 21,
+    marginBottom: 14,
   },
   expandInterpretation: {
     fontFamily: 'Manrope_400Regular',
