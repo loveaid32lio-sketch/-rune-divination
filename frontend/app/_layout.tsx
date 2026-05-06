@@ -3,9 +3,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 import { useFonts, CormorantGaramond_300Light, CormorantGaramond_400Regular, CormorantGaramond_700Bold } from '@expo-google-fonts/cormorant-garamond';
 import { Manrope_400Regular, Manrope_600SemiBold } from '@expo-google-fonts/manrope';
-import { View, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, ActivityIndicator, StyleSheet, useWindowDimensions, Platform } from 'react-native';
 
 export default function Layout() {
+  const { width } = useWindowDimensions();
+  const isDesktop = width >= 768;
+
   const [fontsLoaded] = useFonts({
     CormorantGaramond_300Light,
     CormorantGaramond_400Regular,
@@ -32,16 +35,28 @@ export default function Layout() {
             backgroundColor: '#06140D',
             borderTopColor: 'rgba(212, 175, 55, 0.15)',
             borderTopWidth: 1,
-            height: 80,
-            paddingBottom: 20,
+            height: isDesktop ? 64 : 80,
+            paddingBottom: isDesktop ? 10 : 20,
             paddingTop: 10,
+            ...(isDesktop && {
+              maxWidth: 600,
+              alignSelf: 'center',
+              width: '100%',
+              borderLeftWidth: 1,
+              borderRightWidth: 1,
+              borderLeftColor: 'rgba(212, 175, 55, 0.1)',
+              borderRightColor: 'rgba(212, 175, 55, 0.1)',
+            }),
           },
           tabBarActiveTintColor: '#D4AF37',
           tabBarInactiveTintColor: '#A3B8AD',
           tabBarLabelStyle: {
             fontFamily: 'Manrope_400Regular',
-            fontSize: 11,
+            fontSize: isDesktop ? 12 : 11,
             letterSpacing: 1,
+          },
+          sceneStyle: {
+            backgroundColor: '#06140D',
           },
         }}
       >

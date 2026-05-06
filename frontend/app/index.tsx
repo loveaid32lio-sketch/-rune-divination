@@ -5,15 +5,14 @@ import {
   TouchableOpacity,
   StyleSheet,
   Animated,
-  Dimensions,
   ScrollView,
   ImageBackground,
+  useWindowDimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-const { width } = Dimensions.get('window');
 
 interface RuneResult {
   rune_id: string;
@@ -26,6 +25,10 @@ interface RuneResult {
 }
 
 export default function HomeScreen() {
+  const { width } = useWindowDimensions();
+  const isDesktop = width >= 768;
+  const contentMaxWidth = isDesktop ? 520 : width;
+
   const [result, setResult] = useState<RuneResult | null>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [showResult, setShowResult] = useState(false);
@@ -37,7 +40,6 @@ export default function HomeScreen() {
   const shimmerAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    // Breathing glow animation
     Animated.loop(
       Animated.sequence([
         Animated.timing(glowAnim, { toValue: 1, duration: 2000, useNativeDriver: true }),
@@ -61,7 +63,6 @@ export default function HomeScreen() {
     setIsDrawing(true);
     setShowResult(false);
 
-    // Button press animation
     Animated.sequence([
       Animated.timing(buttonScale, { toValue: 0.9, duration: 100, useNativeDriver: true }),
       Animated.timing(buttonScale, { toValue: 1, duration: 100, useNativeDriver: true }),
@@ -72,14 +73,12 @@ export default function HomeScreen() {
       const data = await response.json();
       setResult(data);
 
-      // Save to history
       await fetch(`${BACKEND_URL}/api/readings`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ rune_id: data.rune_id, position: data.position }),
       });
 
-      // Show result with animation
       setTimeout(() => {
         setIsDrawing(false);
         setShowResult(true);
@@ -106,7 +105,7 @@ export default function HomeScreen() {
 
   return (
     <ImageBackground
-      source={{ uri: 'https://images.unsplash.com/photo-1670073952001-1aafed4bfc02?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1ODB8MHwxfHNlYXJjaHwyfHxkYXJrJTIwbXlzdGljYWwlMjBmb3Jlc3R8ZW58MHx8fHwxNzc4MDgzMjM1fDA&ixlib=rb-4.1.0&q=85&w=800' }}
+      source={{ uri: 'https://images.unsplash.com/photo-1670073952001-1aafed4bfc02?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1ODB8MHwxfHNlYXJjaHwyfHxkYXJrJTIwbXlzdGljYWwlMjBmb3Jlc3R8ZW58MHx8fHwxNzc4MDgzMjM1fDA&ixlib=rb-4.1.0&q=85&w=1200' }}
       style={styles.bgImage}
     >
       <LinearGradient
@@ -114,17 +113,19 @@ export default function HomeScreen() {
         style={styles.overlay}
       >
         <SafeAreaView style={styles.container}>
-          <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+          <ScrollView
+            contentContainerStyle={[styles.scrollContent, { maxWidth: contentMaxWidth, alignSelf: 'center', width: '100%' }]}
+            showsVerticalScrollIndicator={false}
+          >
             {/* Header */}
             <View style={styles.header}>
-              <Text style={styles.title}>ルーン占い</Text>
+              <Text style={[styles.title, isDesktop && styles.titleDesktop]}>ルーン占い</Text>
               <Text style={styles.subtitle}>一枚引き</Text>
             </View>
 
             {!showResult ? (
-              /* Draw Area */
-              <View style={styles.drawArea}>
-                <Animated.View style={[styles.glowCircle, { opacity: glowAnim }]} />
+              <View style={[styles.drawArea, isDesktop && styles.drawAreaDesktop]}>
+                <Animated.View style={[styles.glowCircle, isDesktop && styles.glowCircleDesktop, { opacity: glowAnim }]} />
                 <TouchableOpacity
                   testID="draw-rune-button"
                   style={styles.drawButton}
@@ -132,7 +133,7 @@ export default function HomeScreen() {
                   disabled={isDrawing}
                   activeOpacity={0.7}
                 >
-                  <Animated.View style={[styles.drawButtonInner, { transform: [{ scale: buttonScale }] }]}>
+                  <Animated.View style={[styles.drawButtonInner, isDesktop && styles.drawButtonInnerDesktop, { transform: [{ scale: buttonScale }] }]}>
                     {isDrawing ? (
                       <View style={styles.drawingState}>
                         <Animated.Text style={[styles.drawingSymbol, { opacity: glowAnim }]}>ᚱ</Animated.Text>
@@ -140,16 +141,15 @@ export default function HomeScreen() {
                       </View>
                     ) : (
                       <View style={styles.readyState}>
-                        <Text style={styles.runePreview}>ᛟ</Text>
+                        <Text style={[styles.runePreview, isDesktop && styles.runePreviewDesktop]}>ᛟ</Text>
                         <Text style={styles.drawText}>タップしてルーンを引く</Text>
                       </View>
                     )}
                   </Animated.View>
                 </TouchableOpacity>
-                <Text style={styles.hint}>心を落ち着けて、問いを念じてください</Text>
+                <Text style={[styles.hint, isDesktop && styles.hintDesktop]}>心を落ち着けて、問いを念じてください</Text>
               </View>
             ) : (
-              /* Result Area */
               <Animated.View
                 testID="rune-result-card"
                 style={[
@@ -162,19 +162,18 @@ export default function HomeScreen() {
               >
                 <LinearGradient
                   colors={['#14291E', '#0A1A12']}
-                  style={styles.resultGradient}
+                  style={[styles.resultGradient, isDesktop && styles.resultGradientDesktop]}
                 >
-                  {/* Position Badge */}
                   <View style={[styles.positionBadge, result?.position === 'reversed' && styles.positionBadgeReversed]}>
                     <Text style={styles.positionText}>
                       {result?.position === 'upright' ? '正位置' : '逆位置'}
                     </Text>
                   </View>
 
-                  {/* Rune Symbol */}
                   <Animated.Text
                     style={[
                       styles.runeSymbol,
+                      isDesktop && styles.runeSymbolDesktop,
                       result?.position === 'reversed' && styles.runeReversed,
                       { opacity: shimmerAnim.interpolate({ inputRange: [0, 1], outputRange: [0.8, 1] }) },
                     ]}
@@ -182,24 +181,19 @@ export default function HomeScreen() {
                     {result?.symbol}
                   </Animated.Text>
 
-                  {/* Rune Name */}
-                  <Text style={styles.runeName}>{result?.name}</Text>
+                  <Text style={[styles.runeName, isDesktop && styles.runeNameDesktop]}>{result?.name}</Text>
                   <Text style={styles.runeMeaning}>{result?.meaning}</Text>
 
-                  {/* Origin Section */}
-                  <View style={styles.originSection}>
+                  <View style={[styles.originSection, isDesktop && styles.originSectionDesktop]}>
                     <Text style={styles.originLabel}>成り立ち</Text>
-                    <Text style={styles.originText}>{result?.origin}</Text>
+                    <Text style={[styles.originText, isDesktop && styles.originTextDesktop]}>{result?.origin}</Text>
                   </View>
 
-                  {/* Divider */}
                   <View style={styles.divider} />
 
-                  {/* Interpretation */}
                   <Text style={styles.interpretationLabel}>解釈</Text>
-                  <Text style={styles.interpretation}>{result?.interpretation}</Text>
+                  <Text style={[styles.interpretation, isDesktop && styles.interpretationDesktop]}>{result?.interpretation}</Text>
 
-                  {/* Draw Again Button */}
                   <TouchableOpacity
                     testID="draw-again-button"
                     style={styles.drawAgainButton}
@@ -249,6 +243,10 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 15,
   },
+  titleDesktop: {
+    fontSize: 48,
+    letterSpacing: 8,
+  },
   subtitle: {
     fontFamily: 'Manrope_400Regular',
     fontSize: 13,
@@ -263,6 +261,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     minHeight: 400,
   },
+  drawAreaDesktop: {
+    minHeight: 500,
+  },
   glowCircle: {
     position: 'absolute',
     width: 260,
@@ -271,6 +272,11 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(212, 175, 55, 0.08)',
     borderWidth: 1,
     borderColor: 'rgba(212, 175, 55, 0.2)',
+  },
+  glowCircleDesktop: {
+    width: 320,
+    height: 320,
+    borderRadius: 160,
   },
   drawButton: {
     width: 220,
@@ -294,6 +300,11 @@ const styles = StyleSheet.create({
     shadowRadius: 20,
     elevation: 10,
   },
+  drawButtonInnerDesktop: {
+    width: 240,
+    height: 240,
+    borderRadius: 120,
+  },
   readyState: {
     alignItems: 'center',
   },
@@ -302,6 +313,9 @@ const styles = StyleSheet.create({
     fontSize: 60,
     color: 'rgba(212, 175, 55, 0.4)',
     marginBottom: 8,
+  },
+  runePreviewDesktop: {
+    fontSize: 72,
   },
   drawText: {
     fontFamily: 'Manrope_400Regular',
@@ -333,6 +347,10 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
     textAlign: 'center',
   },
+  hintDesktop: {
+    fontSize: 14,
+    marginTop: 40,
+  },
   resultCard: {
     flex: 1,
     marginTop: 10,
@@ -349,6 +367,9 @@ const styles = StyleSheet.create({
   resultGradient: {
     padding: 32,
     alignItems: 'center',
+  },
+  resultGradientDesktop: {
+    padding: 48,
   },
   positionBadge: {
     paddingHorizontal: 16,
@@ -379,6 +400,9 @@ const styles = StyleSheet.create({
     textShadowRadius: 25,
     marginBottom: 16,
   },
+  runeSymbolDesktop: {
+    fontSize: 120,
+  },
   runeReversed: {
     transform: [{ rotate: '180deg' }],
   },
@@ -388,6 +412,9 @@ const styles = StyleSheet.create({
     color: '#F4EFEA',
     marginBottom: 6,
     textAlign: 'center',
+  },
+  runeNameDesktop: {
+    fontSize: 32,
   },
   runeMeaning: {
     fontFamily: 'Manrope_400Regular',
@@ -405,6 +432,9 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 20,
   },
+  originSectionDesktop: {
+    padding: 24,
+  },
   originLabel: {
     fontFamily: 'Manrope_600SemiBold',
     fontSize: 11,
@@ -418,6 +448,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#F4EFEA',
     lineHeight: 24,
+  },
+  originTextDesktop: {
+    fontSize: 15,
+    lineHeight: 28,
   },
   divider: {
     width: 60,
@@ -440,6 +474,10 @@ const styles = StyleSheet.create({
     lineHeight: 26,
     textAlign: 'center',
     paddingHorizontal: 8,
+  },
+  interpretationDesktop: {
+    fontSize: 16,
+    lineHeight: 30,
   },
   drawAgainButton: {
     marginTop: 30,

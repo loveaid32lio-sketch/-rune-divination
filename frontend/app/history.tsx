@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   RefreshControl,
   ImageBackground,
+  useWindowDimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -28,6 +29,9 @@ interface Reading {
 }
 
 export default function HistoryScreen() {
+  const { width } = useWindowDimensions();
+  const isDesktop = width >= 768;
+
   const [readings, setReadings] = useState<Reading[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -83,7 +87,7 @@ export default function HistoryScreen() {
     return (
       <TouchableOpacity
         testID="history-item"
-        style={styles.card}
+        style={[styles.card, isDesktop && styles.cardDesktop]}
         onPress={() => toggleExpand(item.id)}
         activeOpacity={0.8}
       >
@@ -99,7 +103,7 @@ export default function HistoryScreen() {
             </Text>
           </View>
           <View style={styles.cardCenter}>
-            <Text style={styles.cardName}>{item.rune_name}</Text>
+            <Text style={[styles.cardName, isDesktop && styles.cardNameDesktop]}>{item.rune_name}</Text>
             <View style={styles.cardMeta}>
               <View style={[styles.positionDot, item.position === 'reversed' && styles.positionDotReversed]} />
               <Text style={styles.cardPosition}>
@@ -119,11 +123,11 @@ export default function HistoryScreen() {
           <View style={styles.cardExpanded}>
             <View style={styles.expandDivider} />
             <Text style={styles.expandLabel}>成り立ち</Text>
-            <Text style={styles.expandOrigin}>{item.rune_origin}</Text>
+            <Text style={[styles.expandOrigin, isDesktop && styles.expandOriginDesktop]}>{item.rune_origin}</Text>
             <Text style={styles.expandLabel}>意味</Text>
             <Text style={styles.expandMeaning}>{item.rune_meaning}</Text>
             <Text style={styles.expandLabel}>解釈</Text>
-            <Text style={styles.expandInterpretation}>{item.interpretation}</Text>
+            <Text style={[styles.expandInterpretation, isDesktop && styles.expandInterpretationDesktop]}>{item.interpretation}</Text>
           </View>
         )}
       </TouchableOpacity>
@@ -132,7 +136,7 @@ export default function HistoryScreen() {
 
   return (
     <ImageBackground
-      source={{ uri: 'https://images.unsplash.com/photo-1670073952001-1aafed4bfc02?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1ODB8MHwxfHNlYXJjaHwyfHxkYXJrJTIwbXlzdGljYWwlMjBmb3Jlc3R8ZW58MHx8fHwxNzc4MDgzMjM1fDA&ixlib=rb-4.1.0&q=85&w=800' }}
+      source={{ uri: 'https://images.unsplash.com/photo-1670073952001-1aafed4bfc02?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1ODB8MHwxfHNlYXJjaHwyfHxkYXJrJTIwbXlzdGljYWwlMjBmb3Jlc3R8ZW58MHx8fHwxNzc4MDgzMjM1fDA&ixlib=rb-4.1.0&q=85&w=1200' }}
       style={styles.bgImage}
     >
       <LinearGradient
@@ -141,9 +145,9 @@ export default function HistoryScreen() {
       >
         <SafeAreaView style={styles.container}>
           {/* Header */}
-          <View style={styles.header}>
+          <View style={[styles.header, isDesktop && styles.headerDesktop]}>
             <View>
-              <Text style={styles.title}>占い履歴</Text>
+              <Text style={[styles.title, isDesktop && styles.titleDesktop]}>占い履歴</Text>
               <Text style={styles.countText}>{readings.length}件の記録</Text>
             </View>
             {readings.length > 0 && (
@@ -161,8 +165,8 @@ export default function HistoryScreen() {
           {/* List */}
           {readings.length === 0 ? (
             <View style={styles.emptyState}>
-              <Text style={styles.emptySymbol}>ᛟ</Text>
-              <Text style={styles.emptyTitle}>まだ記録がありません</Text>
+              <Text style={[styles.emptySymbol, isDesktop && styles.emptySymbolDesktop]}>ᛟ</Text>
+              <Text style={[styles.emptyTitle, isDesktop && styles.emptyTitleDesktop]}>まだ記録がありません</Text>
               <Text style={styles.emptyText}>ルーンを引くと、ここに記録されます</Text>
             </View>
           ) : (
@@ -171,7 +175,7 @@ export default function HistoryScreen() {
               data={readings}
               renderItem={renderItem}
               keyExtractor={(item) => item.id}
-              contentContainerStyle={styles.listContent}
+              contentContainerStyle={[styles.listContent, isDesktop && styles.listContentDesktop]}
               showsVerticalScrollIndicator={false}
               refreshControl={
                 <RefreshControl
@@ -208,11 +212,21 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingBottom: 16,
   },
+  headerDesktop: {
+    maxWidth: 640,
+    alignSelf: 'center',
+    width: '100%',
+    paddingTop: 32,
+    paddingBottom: 24,
+  },
   title: {
     fontFamily: 'CormorantGaramond_700Bold',
     fontSize: 28,
     color: '#D4AF37',
     letterSpacing: 2,
+  },
+  titleDesktop: {
+    fontSize: 36,
   },
   countText: {
     fontFamily: 'Manrope_400Regular',
@@ -234,6 +248,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 20,
   },
+  listContentDesktop: {
+    maxWidth: 640,
+    alignSelf: 'center',
+    width: '100%',
+    paddingHorizontal: 0,
+  },
   card: {
     backgroundColor: 'rgba(10, 26, 18, 0.7)',
     borderRadius: 16,
@@ -241,6 +261,9 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(212, 175, 55, 0.15)',
     padding: 18,
     marginBottom: 12,
+  },
+  cardDesktop: {
+    padding: 22,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -272,6 +295,9 @@ const styles = StyleSheet.create({
     fontSize: 17,
     color: '#F4EFEA',
     marginBottom: 4,
+  },
+  cardNameDesktop: {
+    fontSize: 19,
   },
   cardMeta: {
     flexDirection: 'row',
@@ -328,11 +354,19 @@ const styles = StyleSheet.create({
     lineHeight: 21,
     marginBottom: 14,
   },
+  expandOriginDesktop: {
+    fontSize: 14,
+    lineHeight: 24,
+  },
   expandInterpretation: {
     fontFamily: 'Manrope_400Regular',
     fontSize: 14,
     color: '#F4EFEA',
     lineHeight: 22,
+  },
+  expandInterpretationDesktop: {
+    fontSize: 15,
+    lineHeight: 26,
   },
   emptyState: {
     flex: 1,
@@ -345,11 +379,17 @@ const styles = StyleSheet.create({
     color: 'rgba(212, 175, 55, 0.2)',
     marginBottom: 16,
   },
+  emptySymbolDesktop: {
+    fontSize: 80,
+  },
   emptyTitle: {
     fontFamily: 'CormorantGaramond_700Bold',
     fontSize: 20,
     color: '#F4EFEA',
     marginBottom: 8,
+  },
+  emptyTitleDesktop: {
+    fontSize: 24,
   },
   emptyText: {
     fontFamily: 'Manrope_400Regular',

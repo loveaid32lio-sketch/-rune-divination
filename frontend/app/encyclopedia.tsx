@@ -9,6 +9,7 @@ import {
   Modal,
   ScrollView,
   Pressable,
+  useWindowDimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -29,6 +30,10 @@ interface Rune {
 }
 
 export default function EncyclopediaScreen() {
+  const { width } = useWindowDimensions();
+  const isDesktop = width >= 768;
+  const numColumns = isDesktop ? 2 : 1;
+
   const [runes, setRunes] = useState<Rune[]>([]);
   const [selectedRune, setSelectedRune] = useState<Rune | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
@@ -55,17 +60,17 @@ export default function EncyclopediaScreen() {
   const renderRuneItem = ({ item, index }: { item: Rune; index: number }) => (
     <TouchableOpacity
       testID={`encyclopedia-rune-${item.id}`}
-      style={styles.runeItem}
+      style={[styles.runeItem, isDesktop && styles.runeItemDesktop]}
       onPress={() => openDetail(item)}
       activeOpacity={0.7}
     >
       <View style={styles.runeItemLeft}>
-        <View style={styles.runeItemSymbolBox}>
-          <Text style={styles.runeItemSymbol}>{item.symbol}</Text>
+        <View style={[styles.runeItemSymbolBox, isDesktop && styles.runeItemSymbolBoxDesktop]}>
+          <Text style={[styles.runeItemSymbol, isDesktop && styles.runeItemSymbolDesktop]}>{item.symbol}</Text>
         </View>
       </View>
       <View style={styles.runeItemCenter}>
-        <Text style={styles.runeItemName}>{item.name}</Text>
+        <Text style={[styles.runeItemName, isDesktop && styles.runeItemNameDesktop]}>{item.name}</Text>
         <Text style={styles.runeItemMeaning}>{item.meaning}</Text>
       </View>
       <View style={styles.runeItemRight}>
@@ -77,7 +82,7 @@ export default function EncyclopediaScreen() {
 
   return (
     <ImageBackground
-      source={{ uri: 'https://images.unsplash.com/photo-1670073952001-1aafed4bfc02?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1ODB8MHwxfHNlYXJjaHwyfHxkYXJrJTIwbXlzdGljYWwlMjBmb3Jlc3R8ZW58MHx8fHwxNzc4MDgzMjM1fDA&ixlib=rb-4.1.0&q=85&w=800' }}
+      source={{ uri: 'https://images.unsplash.com/photo-1670073952001-1aafed4bfc02?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1ODB8MHwxfHNlYXJjaHwyfHxkYXJrJTIwbXlzdGljYWwlMjBmb3Jlc3R8ZW58MHx8fHwxNzc4MDgzMjM1fDA&ixlib=rb-4.1.0&q=85&w=1200' }}
       style={styles.bgImage}
     >
       <LinearGradient
@@ -86,8 +91,8 @@ export default function EncyclopediaScreen() {
       >
         <SafeAreaView style={styles.container}>
           {/* Header */}
-          <View style={styles.header}>
-            <Text style={styles.title}>ルーン図鑑</Text>
+          <View style={[styles.header, isDesktop && styles.headerDesktop]}>
+            <Text style={[styles.title, isDesktop && styles.titleDesktop]}>ルーン図鑑</Text>
             <Text style={styles.subtitle}>エルダーフサルク全{runes.length}文字</Text>
           </View>
 
@@ -97,7 +102,10 @@ export default function EncyclopediaScreen() {
             data={runes}
             renderItem={renderRuneItem}
             keyExtractor={(item) => item.id}
-            contentContainerStyle={styles.listContent}
+            numColumns={numColumns}
+            key={numColumns}
+            contentContainerStyle={[styles.listContent, isDesktop && styles.listContentDesktop]}
+            columnWrapperStyle={isDesktop ? styles.columnWrapper : undefined}
             showsVerticalScrollIndicator={false}
           />
 
@@ -109,12 +117,11 @@ export default function EncyclopediaScreen() {
             onRequestClose={() => setModalVisible(false)}
           >
             <Pressable style={styles.modalOverlay} onPress={() => setModalVisible(false)}>
-              <Pressable style={styles.modalContent} onPress={(e) => e.stopPropagation()}>
+              <Pressable style={[styles.modalContent, isDesktop && styles.modalContentDesktop]} onPress={(e) => e.stopPropagation()}>
                 <LinearGradient
                   colors={['#14291E', '#0A1A12', '#06140D']}
                   style={styles.modalGradient}
                 >
-                  {/* Close Button */}
                   <TouchableOpacity
                     testID="close-modal-button"
                     style={styles.closeButton}
@@ -124,41 +131,36 @@ export default function EncyclopediaScreen() {
                   </TouchableOpacity>
 
                   <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.modalScroll}>
-                    {/* Symbol */}
-                    <Text style={styles.modalSymbol}>{selectedRune?.symbol}</Text>
-                    <Text style={styles.modalName}>{selectedRune?.name}</Text>
+                    <Text style={[styles.modalSymbol, isDesktop && styles.modalSymbolDesktop]}>{selectedRune?.symbol}</Text>
+                    <Text style={[styles.modalName, isDesktop && styles.modalNameDesktop]}>{selectedRune?.name}</Text>
                     <Text style={styles.modalMeaning}>{selectedRune?.meaning}</Text>
 
-                    {/* Reversible badge */}
                     <View style={[styles.reversibleBadge, !selectedRune?.reversible && styles.reversibleBadgeNo]}>
                       <Text style={styles.reversibleText}>
                         {selectedRune?.reversible ? '逆位置あり' : '逆位置なし'}
                       </Text>
                     </View>
 
-                    {/* Origin */}
                     <View style={styles.sectionCard}>
                       <Text style={styles.sectionLabel}>成り立ち</Text>
-                      <Text style={styles.sectionBody}>{selectedRune?.origin}</Text>
+                      <Text style={[styles.sectionBody, isDesktop && styles.sectionBodyDesktop]}>{selectedRune?.origin}</Text>
                     </View>
 
-                    {/* Upright Meaning */}
                     <View style={styles.sectionCard}>
                       <View style={styles.sectionHeader}>
                         <View style={styles.dotGold} />
                         <Text style={styles.sectionLabel}>正位置の意味</Text>
                       </View>
-                      <Text style={styles.sectionBody}>{selectedRune?.upright}</Text>
+                      <Text style={[styles.sectionBody, isDesktop && styles.sectionBodyDesktop]}>{selectedRune?.upright}</Text>
                     </View>
 
-                    {/* Reversed Meaning */}
                     {selectedRune?.reversible && selectedRune?.reversed ? (
                       <View style={styles.sectionCard}>
                         <View style={styles.sectionHeader}>
                           <View style={styles.dotSilver} />
                           <Text style={styles.sectionLabel}>逆位置の意味</Text>
                         </View>
-                        <Text style={styles.sectionBody}>{selectedRune?.reversed}</Text>
+                        <Text style={[styles.sectionBody, isDesktop && styles.sectionBodyDesktop]}>{selectedRune?.reversed}</Text>
                       </View>
                     ) : null}
                   </ScrollView>
@@ -189,11 +191,20 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingBottom: 16,
   },
+  headerDesktop: {
+    alignItems: 'center',
+    paddingTop: 32,
+    paddingBottom: 24,
+  },
   title: {
     fontFamily: 'CormorantGaramond_700Bold',
     fontSize: 28,
     color: '#D4AF37',
     letterSpacing: 2,
+  },
+  titleDesktop: {
+    fontSize: 36,
+    letterSpacing: 4,
   },
   subtitle: {
     fontFamily: 'Manrope_400Regular',
@@ -206,7 +217,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 20,
   },
+  listContentDesktop: {
+    paddingHorizontal: 40,
+    maxWidth: 800,
+    alignSelf: 'center',
+    width: '100%',
+  },
+  columnWrapper: {
+    gap: 12,
+  },
   runeItem: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: 'rgba(10, 26, 18, 0.7)',
@@ -215,6 +236,10 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(212, 175, 55, 0.12)',
     padding: 14,
     marginBottom: 10,
+  },
+  runeItemDesktop: {
+    padding: 18,
+    borderRadius: 16,
   },
   runeItemLeft: {
     marginRight: 14,
@@ -229,9 +254,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  runeItemSymbolBoxDesktop: {
+    width: 56,
+    height: 56,
+    borderRadius: 14,
+  },
   runeItemSymbol: {
     fontSize: 24,
     color: '#D4AF37',
+  },
+  runeItemSymbolDesktop: {
+    fontSize: 28,
   },
   runeItemCenter: {
     flex: 1,
@@ -241,6 +274,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#F4EFEA',
     marginBottom: 3,
+  },
+  runeItemNameDesktop: {
+    fontSize: 18,
   },
   runeItemMeaning: {
     fontFamily: 'Manrope_400Regular',
@@ -258,17 +294,27 @@ const styles = StyleSheet.create({
     color: 'rgba(163, 184, 173, 0.5)',
     letterSpacing: 1,
   },
-  // Modal styles
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    justifyContent: 'flex-end',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   modalContent: {
     maxHeight: '88%',
+    width: '100%',
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     overflow: 'hidden',
+    position: 'absolute',
+    bottom: 0,
+  },
+  modalContentDesktop: {
+    position: 'relative',
+    bottom: undefined,
+    maxWidth: 560,
+    maxHeight: '80%',
+    borderRadius: 24,
   },
   modalGradient: {
     paddingTop: 20,
@@ -298,12 +344,18 @@ const styles = StyleSheet.create({
     textShadowRadius: 20,
     marginBottom: 12,
   },
+  modalSymbolDesktop: {
+    fontSize: 88,
+  },
   modalName: {
     fontFamily: 'CormorantGaramond_700Bold',
     fontSize: 26,
     color: '#F4EFEA',
     textAlign: 'center',
     marginBottom: 4,
+  },
+  modalNameDesktop: {
+    fontSize: 30,
   },
   modalMeaning: {
     fontFamily: 'Manrope_400Regular',
@@ -359,6 +411,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#F4EFEA',
     lineHeight: 24,
+  },
+  sectionBodyDesktop: {
+    fontSize: 15,
+    lineHeight: 27,
   },
   dotGold: {
     width: 6,
