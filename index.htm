@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ルーン占い 🔮</title>
+
+    <!-- PWA設定 -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/svg+xml" href="icon.svg">
+    <meta name="theme-color" content="#2d4a3a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="SUMI ルーン占い">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a3a3a 0%, #2d5a4a 50%, #1a3a3a 100%);
+            padding: 20px;
+        }
+
+        .container {
+            background: linear-gradient(to bottom, #2d4a3a 0%, #1f3a32 100%);
+            border: 3px solid #4a7a6a;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow:
+                0 20px 60px rgba(0, 0, 0, 0.6),
+                inset 0 1px 0 rgba(212, 175, 55, 0.2),
+                0 0 30px rgba(212, 175, 55, 0.1);
+            max-width: 600px;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 和風の水墨画テクスチャ */
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image:
+                repeating-linear-gradient(
+                    90deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(212, 175, 55, 0.02) 2px,
+                    rgba(212, 175, 55, 0.02) 4px
+                ),
+                repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 1px,
+                    rgba(212, 175, 55, 0.01) 1px,
+                    rgba(212, 175, 55, 0.01) 2px
+                );
+            pointer-events: none;
+        }
+
+        .content {
+            position: relative;
+            z-index: 1;
+        }
+
+        h1 {
+            color: #d4af37;
+            margin-bottom: 10px;
+            font-size: 32px;
+            text-align: center;
+            text-shadow:
+                0 0 10px rgba(212, 175, 55, 0.5),
+                0 0 20px rgba(212, 175, 55, 0.3),
+                1px 1px 2px rgba(0, 0, 0, 0.5);
+            font-weight: 600;
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #8ab48a;
+            margin-bottom: 30px;
+            font-size: 14px;
+            font-style: italic;
+            opacity: 0.8;
+        }
+
+        .rune-display {
+            background: linear-gradient(135deg, rgba(45, 90, 74, 0.5) 0%, rgba(31, 58, 50, 0.5) 100%);
+            border: 2px solid #4a7a6a;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+            text-align: center;
+            box-shadow:
+                inset 0 2px 5px rgba(0, 0, 0, 0.3),
+                0 0 20px rgba(212, 175, 55, 0.1);
+            min-height: 250px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .rune-image {
+            font-size: 120px;
+            font-weight: bold;
+            color: #d4af37;
+            text-shadow:
+                0 0 20px rgba(212, 175, 55, 0.8),
+                0 0 40px rgba(212, 175, 55, 0.4),
+                0 0 60px rgba(138, 180, 138, 0.2),
+                2px 2px 4px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s ease;
+            opacity: 0.95;
+            letter-spacing: 10px;
+        }
+
+        .rune-image.flipped {
+            transform: scaleY(-1);
+        }
+
+        .rune-info {
+            color: #c8dcc8;
+        }
+
+        .rune-name {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #d4af37;
+            text-shadow: 0 0 10px rgba(212, 175, 55, 0.4);
+        }
+
+        .rune-position {
+            font-size: 14px;
+            color: #8ab48a;
+            margin-bottom: 15px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-shadow: 0 0 5px rgba(138, 180, 138, 0.3);
+        }
+
+        .rune-meaning {
+            font-size: 16px;
+            line-height: 1.8;
+            color: #d4e4d4;
+            background: rgba(45, 90, 74, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid rgba(74, 122, 106, 0.5);
+            text-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        button {
+            flex: 1;
+            padding: 15px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-draw {
+            background: linear-gradient(135deg, #4a7a6a 0%, #2d5a4a 100%);
+            color: #d4af37;
+            box-shadow:
+                0 4px 15px rgba(0, 0, 0, 0.4),
+                0 0 15px rgba(212, 175, 55, 0.2);
+            border: 1px solid #d4af37;
+            font-weight: 700;
+        }
+
+        .btn-draw:hover {
+            transform: translateY(-2px);
+            box-shadow:
+                0 6px 20px rgba(0, 0, 0, 0.5),
+                0 0 25px rgba(212, 175, 55, 0.4);
+            background: linear-gradient(135deg, #5a8a7a 0%, #3d6a5a 100%);
+        }
+
+        .btn-draw:active {
+            transform: translateY(0);
+        }
+
+        .btn-reset {
+            background: rgba(45, 90, 74, 0.5);
+            color: #8ab48a;
+            border: 2px solid #4a7a6a;
+        }
+
+        .btn-reset:hover {
+            background: rgba(45, 90, 74, 0.7);
+            color: #a8c4a8;
+        }
+
+        .intro {
+            background: rgba(74, 122, 106, 0.3);
+            border-left: 4px solid #d4af37;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            color: #c8dcc8;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .intro strong {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #d4af37;
+        }
+
+        .line-cta {
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.1) 0%, rgba(138, 180, 138, 0.1) 100%);
+            border: 2px solid #d4af37;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .cta-text {
+            margin-bottom: 15px;
+            color: #c8dcc8;
+        }
+
+        .cta-text strong {
+            display: block;
+            color: #d4af37;
+            font-size: 16px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+        }
+
+        .cta-text p {
+            font-size: 13px;
+            line-height: 1.6;
+            color: #d4e4d4;
+            margin: 0;
+        }
+
+        .btn-line {
+            display: inline-block;
+            background: linear-gradient(135deg, #00b900 0%, #00a000 100%);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 14px;
+            margin: 15px 0;
+            box-shadow:
+                0 4px 15px rgba(0, 185, 0, 0.3),
+                0 0 10px rgba(0, 185, 0, 0.2);
+            transition: all 0.3s ease;
+            letter-spacing: 1px;
+            border: none;
+        }
+
+        .btn-line:hover {
+            transform: translateY(-2px);
+            box-shadow:
+                0 6px 20px rgba(0, 185, 0, 0.4),
+                0 0 15px rgba(0, 185, 0, 0.3);
+            background: linear-gradient(135deg, #00d900 0%, #00b900 100%);
+        }
+
+        .btn-line:active {
+            transform: translateY(0);
+        }
+
+        .cta-note {
+            font-size: 11px;
+            color: #8ab48a;
+            margin-top: 10px;
+            font-style: italic;
+        }
+
+        .consult-block {
+            background: linear-gradient(135deg, rgba(74, 122, 106, 0.2) 0%, rgba(45, 90, 74, 0.2) 100%);
+            border: 1px solid rgba(212, 175, 55, 0.35);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .consult-message strong {
+            display: block;
+            color: #d4af37;
+            font-size: 15px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+        }
+
+        .consult-message p {
+            font-size: 13px;
+            line-height: 1.8;
+            color: #d4e4d4;
+            margin-bottom: 15px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 24px;
+            }
+
+            .rune-image {
+                font-size: 80px;
+            }
+
+            .rune-meaning {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+            <h1>🔮 ルーン占い</h1>
+            <p class="subtitle">北欧の神秘からのメッセージ</p>
+
+            <div id="intro" class="intro">
+                <strong>✨ 使い方</strong>
+                「ルーンを引く」ボタンをクリックして、あなたへのメッセージを受け取ってください。ルーンは正位置と逆位置で異なる意味を持ちます。
+            </div>
+
+            <div id="runeDisplay" class="rune-display hidden">
+                <div class="rune-image" id="runeImage">ᚠ</div>
+                <div class="rune-info">
+                    <div class="rune-name" id="runeName">Fehu</div>
+                    <div class="rune-position" id="runePositionLabel">正位置</div>
+                    <div class="rune-meaning" id="runeMeaning">意味が表示されます</div>
+                </div>
+            </div>
+
+            <div id="consultBlock" class="consult-block hidden">
+                <div class="consult-message">
+                    <strong>🌿 このルーンの意味、もっと深く知りたいですか？</strong>
+                    <p>ルーンが示すメッセージは、あなたの今の状況や悩みによってさらに深い意味を持ちます。「自分にとってどういう意味なんだろう？」と感じたら、ぜひ気軽にご相談ください。あなたの状況に合わせたルーン解釈を一緒に読み解きます。</p>
+                </div>
+                <a href="https://lin.ee/NhTXkU1" class="btn-line" target="_blank">
+                    💬 LINEで相談してみる
+                </a>
+                <p class="cta-note">お気軽にどうぞ。お返事します。</p>
+            </div>
+
+            <div class="button-group">
+                <button class="btn-draw" onclick="drawRune()">ルーンを引く</button>
+                <button class="btn-reset" onclick="resetRune()">クリア</button>
+            </div>
+
+            <div class="line-cta">
+                <div class="cta-text">
+                    <strong>✨ ルーンの詳しい意味を知りたい方へ</strong>
+                    <p>LINE友達登録すると、全24ルーン＋ブランクルーンの詳細な説明と、より深い占い機能が使えます。</p>
+                </div>
+                <a href="https://lin.ee/NhTXkU1" class="btn-line" target="_blank">
+                    📱 LINE友達登録（詳細版へ）
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ルーン文字のデータベース（V3基準）
+        const runes = [
+            {
+                name: "Fehu",
+                symbol: "ᚠ",
+                meaning: {
+                    upright: "段階的な努力により豊かな成果を得る、物質的な豊かさと繁栄",
+                    reversed: "強欲さや無駄づかい、経済的な課題"
+                }
+            },
+            {
+                name: "Uruz",
+                symbol: "ᚢ",
+                meaning: {
+                    upright: "本来の力強さと生命力、困難を打ち抜く勇気",
+                    reversed: "エネルギーが枯渇、心身の疲弊"
+                }
+            },
+            {
+                name: "Thurisaz",
+                symbol: "ᚦ",
+                meaning: {
+                    upright: "試練を通じた成長と変化、守られている時期",
+                    reversed: "争いや悪い影響、警戒が必要な時期"
+                }
+            },
+            {
+                name: "Ansuz",
+                symbol: "ᚨ",
+                meaning: {
+                    upright: "知識と叡智による導き、言葉の力を信じる時期",
+                    reversed: "誤解や情報の混乱、聞き間違い"
+                }
+            },
+            {
+                name: "Raidho",
+                symbol: "ᚱ",
+                meaning: {
+                    upright: "人生の新しいステージへの移動、スムーズな前進",
+                    reversed: "停滞や遅延、方向転換の必要性"
+                }
+            },
+            {
+                name: "Kenaz",
+                symbol: "ᚲ",
+                meaning: {
+                    upright: "内からの光、創造的な情熱が目覚める",
+                    reversed: "やる気の喪失、物事が進まない停滞感"
+                }
+            },
+            {
+                name: "Gebo",
+                symbol: "ᚷ",
+                meaning: {
+                    upright: "与えることと受け取るバランスの中の調和、絆の深まり"
+                }
+            },
+            {
+                name: "Wunjo",
+                symbol: "ᚹ",
+                meaning: {
+                    upright: "喜びと達成感、願いが形になる時期",
+                    reversed: "失望や悔しさ、期待と現実のズレ"
+                }
+            },
+            {
+                name: "Hagalaz",
+                symbol: "ᚺ",
+                meaning: {
+                    upright: "避けられない変革、古いものが壊れ新しい始まりが来る"
+                }
+            },
+            {
+                name: "Nauthiz",
+                symbol: "ᚾ",
+                meaning: {
+                    upright: "困難を通じた自己鍛錬、必要とされる我慢と工夫",
+                    reversed: "やり過ぎによる疲弊、無理を続けている"
+                }
+            },
+            {
+                name: "Isa",
+                symbol: "ᛁ",
+                meaning: {
+                    upright: "今は待つべき時、静かに内面を見つめる期間"
+                }
+            },
+            {
+                name: "Jera",
+                symbol: "ᛃ",
+                meaning: {
+                    upright: "季節の循環と自然な流れ、蒔いた種が実を結ぶ時期"
+                }
+            },
+            {
+                name: "Eihwaz",
+                symbol: "ᛇ",
+                meaning: {
+                    upright: "大きな変容の中での安定、信念を持って進む"
+                }
+            },
+            {
+                name: "Perthro",
+                symbol: "ᛈ",
+                meaning: {
+                    upright: "隠されていた可能性が開く、運命の導き",
+                    reversed: "秘密が壊れる、予期しない展開で混乱"
+                }
+            },
+            {
+                name: "Algiz",
+                symbol: "ᛉ",
+                meaning: {
+                    upright: "導きと保護、直感が研ぎ澄まされている",
+                    reversed: "無防備になっている、注意が必要"
+                }
+            },
+            {
+                name: "Sowilo",
+                symbol: "ᛊ",
+                meaning: {
+                    upright: "目標達成が近い、明るい見通しと成功"
+                }
+            },
+            {
+                name: "Tiwaz",
+                symbol: "ᛏ",
+                meaning: {
+                    upright: "正義のための決断、リーダーとしての資質を発揮する",
+                    reversed: "無理な闘い、自分の限界を知る必要"
+                }
+            },
+            {
+                name: "Berkano",
+                symbol: "ᛒ",
+                meaning: {
+                    upright: "新しい生命の誕生、成長と癒しの時期",
+                    reversed: "成長が停滞、内面への向き合いが必要"
+                }
+            },
+            {
+                name: "Ehwaz",
+                symbol: "ᛖ",
+                meaning: {
+                    upright: "信頼できるパートナーとの調和、スムーズな協力関係",
+                    reversed: "相手との衝突、信頼関係の危機"
+                }
+            },
+            {
+                name: "Mannaz",
+                symbol: "ᛗ",
+                meaning: {
+                    upright: "自分自身を知ること、周囲からの支援を受ける時期",
+                    reversed: "孤立や自分勝手さ、人間関係の問題"
+                }
+            },
+            {
+                name: "Laguz",
+                symbol: "ᛚ",
+                meaning: {
+                    upright: "直感と感情の流れに身を任せる、無意識の力を信じる",
+                    reversed: "感情が支配的、バランスを失っている"
+                }
+            },
+            {
+                name: "Ingwaz",
+                symbol: "ᛜ",
+                meaning: {
+                    upright: "事柄の完成が近い、新しいステージへの準備完了"
+                }
+            },
+            {
+                name: "Othila",
+                symbol: "ᛟ",
+                meaning: {
+                    upright: "家庭と基盤の安定、伝統と遺産を大切にする",
+                    reversed: "家族との葛藤、自分らしさを見失う"
+                }
+            },
+            {
+                name: "Dagaz",
+                symbol: "ᛞ",
+                meaning: {
+                    upright: "新しい朝が訪れる、光による目覚めと変化"
+                }
+            },
+            {
+                name: "Blank",
+                symbol: "◯",
+                meaning: {
+                    upright: "未知なる可能性、運命の導き、神秘なる力、問われた答えは今だ明かされず"
+                }
+            }
+        ];
+
+        let currentRune = null;
+        let isReversed = false;
+
+        // 逆位置がないルーン（ファイナル版基準）
+        const noReversedRunes = ["Gebo", "Hagalaz", "Isa", "Jera", "Eihwaz", "Sowilo", "Ingwaz", "Dagaz", "Blank"];
+
+        function drawRune() {
+            // ランダムにルーンを選択
+            const randomIndex = Math.floor(Math.random() * runes.length);
+            currentRune = runes[randomIndex];
+
+            // 逆位置がないルーンかチェック
+            if (noReversedRunes.includes(currentRune.name)) {
+                isReversed = false;
+            } else {
+                // ランダムに正位置か逆位置かを決定
+                isReversed = Math.random() < 0.5;
+            }
+
+            // 表示を更新
+            const display = document.getElementById('runeDisplay');
+            const runeImage = document.getElementById('runeImage');
+            const runeName = document.getElementById('runeName');
+            const runePositionLabel = document.getElementById('runePositionLabel');
+            const runeMeaning = document.getElementById('runeMeaning');
+
+            runeImage.textContent = currentRune.symbol;
+            runeName.textContent = currentRune.name;
+
+            if (isReversed) {
+                runeImage.classList.add('flipped');
+                runePositionLabel.textContent = '逆位置';
+                runeMeaning.textContent = currentRune.meaning.reversed;
+            } else {
+                runeImage.classList.remove('flipped');
+                runePositionLabel.textContent = '正位置';
+                runeMeaning.textContent = currentRune.meaning.upright;
+            }
+
+            // イントロを非表示、相談ブロックを表示
+            document.getElementById('intro').classList.add('hidden');
+            display.classList.remove('hidden');
+            document.getElementById('consultBlock').classList.remove('hidden');
+        }
+
+        function resetRune() {
+            currentRune = null;
+            isReversed = false;
+            document.getElementById('runeDisplay').classList.add('hidden');
+            document.getElementById('consultBlock').classList.add('hidden');
+            document.getElementById('intro').classList.remove('hidden');
+        }
+
+        // Service Worker登録（PWA対応）
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('service-worker.js')
+                .then(registration => {
+                    console.log('Service Worker登録成功:', registration);
+                })
+                .catch(error => {
+                    console.log('Service Worker登録失敗:', error);
+                });
+        }
+    </script>
+</body>
+</html>
