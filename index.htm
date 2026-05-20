@@ -325,6 +325,75 @@
             margin-bottom: 15px;
         }
 
+        .btn-detail {
+            flex: 1;
+            padding: 15px;
+            font-size: 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            letter-spacing: 1px;
+            background: rgba(212, 175, 55, 0.08);
+            color: #d4af37;
+            border: 1px solid rgba(212, 175, 55, 0.4);
+        }
+
+        .btn-detail:hover {
+            background: rgba(212, 175, 55, 0.15);
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
+        }
+
+        .detail-panel {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease;
+            opacity: 0;
+        }
+
+        .detail-panel.is-open {
+            max-height: 400px;
+            opacity: 1;
+            margin-bottom: 8px;
+        }
+
+        .detail-inner {
+            background: linear-gradient(135deg, rgba(45, 90, 74, 0.4) 0%, rgba(31, 58, 50, 0.4) 100%);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 10px;
+            padding: 18px;
+            margin-top: 12px;
+        }
+
+        .detail-label {
+            font-size: 10px;
+            letter-spacing: 0.2em;
+            color: #8ab48a;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .detail-reading {
+            font-size: 15px;
+            font-weight: 700;
+            color: #d4af37;
+            margin-bottom: 10px;
+            text-shadow: 0 0 8px rgba(212, 175, 55, 0.3);
+        }
+
+        .detail-divider {
+            width: 24px;
+            height: 1px;
+            background-color: rgba(212, 175, 55, 0.3);
+            margin-bottom: 10px;
+        }
+
+        .detail-origin {
+            font-size: 13px;
+            line-height: 1.8;
+            color: #c8dcc8;
+        }
+
         .hidden {
             display: none !important;
         }
@@ -364,6 +433,16 @@
                 </div>
             </div>
 
+            <!-- 詳細パネル -->
+            <div class="detail-panel hidden" id="detailPanel">
+                <div class="detail-inner">
+                    <p class="detail-label">Origin</p>
+                    <p class="detail-reading" id="detailReading">—</p>
+                    <div class="detail-divider"></div>
+                    <p class="detail-origin" id="detailOrigin">—</p>
+                </div>
+            </div>
+
             <div id="consultBlock" class="consult-block hidden">
                 <div class="consult-message">
                     <strong>🌿 このルーンの意味、もっと深く知りたいですか？</strong>
@@ -377,16 +456,17 @@
 
             <div class="button-group">
                 <button class="btn-draw" onclick="drawRune()">ルーンを引く</button>
+                <button class="btn-detail hidden" id="btnDetail" onclick="toggleDetail()">詳しく見る ▾</button>
                 <button class="btn-reset" onclick="resetRune()">クリア</button>
             </div>
 
             <div class="line-cta">
                 <div class="cta-text">
-                    <strong>✨ ルーンの詳しい意味を知りたい方へ</strong>
-                    <p>LINE友達登録すると、全24ルーン＋ブランクルーンの詳細な説明と、より深い占い機能が使えます。</p>
+                    <strong>🌿 今日のルーンをもっと深く受け取りたい方へ</strong>
+                    <p>ルーンが映し出した今日のメッセージを、ヒプノセラピーでさらに深く探ってみませんか。あなたの内側にあるものと、静かに向き合う時間です。</p>
                 </div>
-                <a href="https://lin.ee/NhTXkU1" class="btn-line" target="_blank">
-                    📱 LINE友達登録（詳細版へ）
+                <a href="https://psytecnic.amebaownd.com" class="btn-line" target="_blank">
+                    体験セッションを予約する
                 </a>
             </div>
         </div>
@@ -395,197 +475,31 @@
     <script>
         // ルーン文字のデータベース（V3基準）
         const runes = [
-            {
-                name: "Fehu",
-                symbol: "ᚠ",
-                meaning: {
-                    upright: "段階的な努力により豊かな成果を得る、物質的な豊かさと繁栄",
-                    reversed: "強欲さや無駄づかい、経済的な課題"
-                }
-            },
-            {
-                name: "Uruz",
-                symbol: "ᚢ",
-                meaning: {
-                    upright: "本来の力強さと生命力、困難を打ち抜く勇気",
-                    reversed: "エネルギーが枯渇、心身の疲弊"
-                }
-            },
-            {
-                name: "Thurisaz",
-                symbol: "ᚦ",
-                meaning: {
-                    upright: "試練を通じた成長と変化、守られている時期",
-                    reversed: "争いや悪い影響、警戒が必要な時期"
-                }
-            },
-            {
-                name: "Ansuz",
-                symbol: "ᚨ",
-                meaning: {
-                    upright: "知識と叡智による導き、言葉の力を信じる時期",
-                    reversed: "誤解や情報の混乱、聞き間違い"
-                }
-            },
-            {
-                name: "Raidho",
-                symbol: "ᚱ",
-                meaning: {
-                    upright: "人生の新しいステージへの移動、スムーズな前進",
-                    reversed: "停滞や遅延、方向転換の必要性"
-                }
-            },
-            {
-                name: "Kenaz",
-                symbol: "ᚲ",
-                meaning: {
-                    upright: "内からの光、創造的な情熱が目覚める",
-                    reversed: "やる気の喪失、物事が進まない停滞感"
-                }
-            },
-            {
-                name: "Gebo",
-                symbol: "ᚷ",
-                meaning: {
-                    upright: "与えることと受け取るバランスの中の調和、絆の深まり"
-                }
-            },
-            {
-                name: "Wunjo",
-                symbol: "ᚹ",
-                meaning: {
-                    upright: "喜びと達成感、願いが形になる時期",
-                    reversed: "失望や悔しさ、期待と現実のズレ"
-                }
-            },
-            {
-                name: "Hagalaz",
-                symbol: "ᚺ",
-                meaning: {
-                    upright: "避けられない変革、古いものが壊れ新しい始まりが来る"
-                }
-            },
-            {
-                name: "Nauthiz",
-                symbol: "ᚾ",
-                meaning: {
-                    upright: "困難を通じた自己鍛錬、必要とされる我慢と工夫",
-                    reversed: "やり過ぎによる疲弊、無理を続けている"
-                }
-            },
-            {
-                name: "Isa",
-                symbol: "ᛁ",
-                meaning: {
-                    upright: "今は待つべき時、静かに内面を見つめる期間"
-                }
-            },
-            {
-                name: "Jera",
-                symbol: "ᛃ",
-                meaning: {
-                    upright: "季節の循環と自然な流れ、蒔いた種が実を結ぶ時期"
-                }
-            },
-            {
-                name: "Eihwaz",
-                symbol: "ᛇ",
-                meaning: {
-                    upright: "大きな変容の中での安定、信念を持って進む"
-                }
-            },
-            {
-                name: "Perthro",
-                symbol: "ᛈ",
-                meaning: {
-                    upright: "隠されていた可能性が開く、運命の導き",
-                    reversed: "秘密が壊れる、予期しない展開で混乱"
-                }
-            },
-            {
-                name: "Algiz",
-                symbol: "ᛉ",
-                meaning: {
-                    upright: "導きと保護、直感が研ぎ澄まされている",
-                    reversed: "無防備になっている、注意が必要"
-                }
-            },
-            {
-                name: "Sowilo",
-                symbol: "ᛊ",
-                meaning: {
-                    upright: "目標達成が近い、明るい見通しと成功"
-                }
-            },
-            {
-                name: "Tiwaz",
-                symbol: "ᛏ",
-                meaning: {
-                    upright: "正義のための決断、リーダーとしての資質を発揮する",
-                    reversed: "無理な闘い、自分の限界を知る必要"
-                }
-            },
-            {
-                name: "Berkano",
-                symbol: "ᛒ",
-                meaning: {
-                    upright: "新しい生命の誕生、成長と癒しの時期",
-                    reversed: "成長が停滞、内面への向き合いが必要"
-                }
-            },
-            {
-                name: "Ehwaz",
-                symbol: "ᛖ",
-                meaning: {
-                    upright: "信頼できるパートナーとの調和、スムーズな協力関係",
-                    reversed: "相手との衝突、信頼関係の危機"
-                }
-            },
-            {
-                name: "Mannaz",
-                symbol: "ᛗ",
-                meaning: {
-                    upright: "自分自身を知ること、周囲からの支援を受ける時期",
-                    reversed: "孤立や自分勝手さ、人間関係の問題"
-                }
-            },
-            {
-                name: "Laguz",
-                symbol: "ᛚ",
-                meaning: {
-                    upright: "直感と感情の流れに身を任せる、無意識の力を信じる",
-                    reversed: "感情が支配的、バランスを失っている"
-                }
-            },
-            {
-                name: "Ingwaz",
-                symbol: "ᛜ",
-                meaning: {
-                    upright: "事柄の完成が近い、新しいステージへの準備完了"
-                }
-            },
-            {
-                name: "Othila",
-                symbol: "ᛟ",
-                meaning: {
-                    upright: "家庭と基盤の安定、伝統と遺産を大切にする",
-                    reversed: "家族との葛藤、自分らしさを見失う"
-                }
-            },
-            {
-                name: "Dagaz",
-                symbol: "ᛞ",
-                meaning: {
-                    upright: "新しい朝が訪れる、光による目覚めと変化"
-                }
-            },
-            {
-                name: "Blank",
-                symbol: "◯",
-                meaning: {
-                    upright: "未知なる可能性、運命の導き、神秘なる力、問われた答えは今だ明かされず"
-                }
-            }
+            { name: "Fehu", reading: "フェオ", symbol: "ᚠ", origin: "家畜の牛。古代社会では牛が最も重要な財産であり、富と豊かさの象徴として考えられていた。", meaning: { upright: "段階的な努力により豊かな成果を得る、物質的な豊かさと繁栄", reversed: "強欲さや無駄づかい、経済的な課題" } },
+            { name: "Uruz", reading: "ウル", symbol: "ᚢ", origin: "野生の野牛（現在は絶滅）。古代ゲルマン民族にとって最も危険で力強い動物で、制御できない原始的な力の象徴。", meaning: { upright: "本来の力強さと生命力、困難を打ち抜く勇気", reversed: "エネルギーが枯渇、心身の疲弊" } },
+            { name: "Thurisaz", reading: "ソーン", symbol: "ᚦ", origin: "巨人またはトゲ。北欧神話の巨人族の力と、防御や保護の象徴。危険と同時に守りをもたらす力。", meaning: { upright: "試練を通じた成長と変化、守られている時期", reversed: "争いや悪い影響、警戒が必要な時期" } },
+            { name: "Ansuz", reading: "アンスール", symbol: "ᚨ", origin: "神またはエスイル。北欧神話の高位の神々を意味し、神聖な叡智と言葉の力の象徴。", meaning: { upright: "知識と叡智による導き、言葉の力を信じる時期", reversed: "誤解や情報の混乱、聞き間違い" } },
+            { name: "Raidho", reading: "ラド", symbol: "ᚱ", origin: "旅または車輪。馬による旅と、人生の移動・進化を象徴。循環する時間と前への動きを表す。", meaning: { upright: "人生の新しいステージへの移動、スムーズな前進", reversed: "停滞や遅延、方向転換の必要性" } },
+            { name: "Kenaz", reading: "ケン", symbol: "ᚲ", origin: "松明または火。暗闇を照らす光であり、知識、視力、創造的なひらめきを象徴。", meaning: { upright: "内からの光、創造的な情熱が目覚める", reversed: "やる気の喪失、物事が進まない停滞感" } },
+            { name: "Gebo", reading: "ギュフ", symbol: "ᚷ", origin: "贈り物または交換。与えることと受け取ることの均衡、人間関係と絆を象徴。", meaning: { upright: "与えることと受け取るバランスの中の調和、絆の深まり" } },
+            { name: "Wunjo", reading: "ウィン", symbol: "ᚹ", origin: "喜びまたは幸福。完成と達成感、人生の調和した状態を象徴。", meaning: { upright: "喜びと達成感、願いが形になる時期", reversed: "失望や悔しさ、期待と現実のズレ" } },
+            { name: "Hagalaz", reading: "ハガル", symbol: "ᚺ", origin: "ひょうまたは雹。予測不可能な自然災害であり、破壊と同時に新しい始まりをもたらす変化の象徴。", meaning: { upright: "避けられない変革、古いものが壊れ新しい始まりが来る" } },
+            { name: "Nauthiz", reading: "ニード", symbol: "ᚾ", origin: "必要性または制約。困難な状況を乗り越えるために必要な強さと工夫を象徴。", meaning: { upright: "困難を通じた自己鍛錬、必要とされる我慢と工夫", reversed: "やり過ぎによる疲弊、無理を続けている" } },
+            { name: "Isa", reading: "イス", symbol: "ᛁ", origin: "氷。動きを止める冷たさと、静寂の中での内面的な深まりを象徴。", meaning: { upright: "今は待つべき時、静かに内面を見つめる期間" } },
+            { name: "Jera", reading: "ヤラ", symbol: "ᛃ", origin: "一年または季節。時間の循環と自然のサイクルを象徴。すべてのものに時期がある。", meaning: { upright: "季節の循環と自然な流れ、蒔いた種が実を結ぶ時期" } },
+            { name: "Eihwaz", reading: "ユル", symbol: "ᛇ", origin: "ヒバの木。堅い木であり、変容の中での安定と防御の力を象徴。", meaning: { upright: "大きな変容の中での安定、信念を持って進む" } },
+            { name: "Perthro", reading: "ペオース", symbol: "ᛈ", origin: "賽子またはサイコロ。秘密で隠された運命、予測不可能な偶然を象徴。", meaning: { upright: "隠されていた可能性が開く、運命の導き", reversed: "秘密が壊れる、予期しない展開で混乱" } },
+            { name: "Algiz", reading: "エオロー", symbol: "ᛉ", origin: "ムース。強い動物であり、保護と防御、直感的な警戒心を象徴。", meaning: { upright: "導きと保護、直感が研ぎ澄まされている", reversed: "無防備になっている、注意が必要" } },
+            { name: "Sowilo", reading: "シゲル", symbol: "ᛊ", origin: "太陽。すべての光と暖かさの源であり、成功と明るい見通しを象徴。", meaning: { upright: "目標達成が近い、明るい見通しと成功" } },
+            { name: "Tiwaz", reading: "ティール", symbol: "ᛏ", origin: "神ティール。北欧神話の正義と勇敢さの神であり、戦いと正義の象徴。", meaning: { upright: "正義のための決断、リーダーとしての資質を発揮する", reversed: "無理な闘い、自分の限界を知る必要" } },
+            { name: "Berkano", reading: "ベオーク", symbol: "ᛒ", origin: "樺の木。新しい成長と優しい再生、母性と新しい生命の象徴。", meaning: { upright: "新しい生命の誕生、成長と癒しの時期", reversed: "成長が停滞、内面への向き合いが必要" } },
+            { name: "Ehwaz", reading: "エオー", symbol: "ᛖ", origin: "馬。速度と動き、信頼できるパートナーとの協力を象徴。", meaning: { upright: "信頼できるパートナーとの調和、スムーズな協力関係", reversed: "相手との衝突、信頼関係の危機" } },
+            { name: "Mannaz", reading: "マン", symbol: "ᛗ", origin: "人間。自己認識と人間関係、社会における自分の位置を象徴。", meaning: { upright: "自分自身を知ること、周囲からの支援を受ける時期", reversed: "孤立や自分勝手さ、人間関係の問題" } },
+            { name: "Laguz", reading: "ラグ", symbol: "ᛚ", origin: "湖または海の水。流動性と深い直感、無意識の力を象徴。", meaning: { upright: "直感と感情の流れに身を任せる、無意識の力を信じる", reversed: "感情が支配的、バランスを失っている" } },
+            { name: "Ingwaz", reading: "イング", symbol: "ᛜ", origin: "種または神イング。内に秘められた可能性の完成と達成を象徴。", meaning: { upright: "事柄の完成が近い、新しいステージへの準備完了" } },
+            { name: "Othila", reading: "オセル", symbol: "ᛟ", origin: "相続地または家。祖先からの遺産、家族の絆と伝統を象徴。", meaning: { upright: "家庭と基盤の安定、伝統と遺産を大切にする", reversed: "家族との葛藤、自分らしさを見失う" } },
+            { name: "Dagaz", reading: "ダエグ", symbol: "ᛞ", origin: "昼または夜明け。新しい時代の到来と目覚めの光を象徴。", meaning: { upright: "新しい朝が訪れる、光による目覚めと変化" } },
+            { name: "Blank", reading: "ブランク", symbol: "◯", origin: "無限の可能性。古き時代と新しき時代の狭間に存在するルーン。すべての始まりであり、すべての終わりであり、その先の無限を象徴する。", meaning: { upright: "未知なる可能性、運命の導き、神秘なる力、問われた答えは今だ明かされず" } }
         ];
 
         let currentRune = null;
@@ -627,18 +541,40 @@
                 runeMeaning.textContent = currentRune.meaning.upright;
             }
 
+            // 詳細データをセット
+            document.getElementById('detailReading').textContent = currentRune.name + "（" + currentRune.reading + "）";
+            document.getElementById('detailOrigin').textContent = currentRune.origin;
+
             // イントロを非表示、相談ブロックを表示
             document.getElementById('intro').classList.add('hidden');
             display.classList.remove('hidden');
             document.getElementById('consultBlock').classList.remove('hidden');
+            document.getElementById('btnDetail').classList.remove('hidden');
+        }
+
+        let detailOpen = false;
+
+        function toggleDetail() {
+            detailOpen = !detailOpen;
+            const panel = document.getElementById('detailPanel');
+            const btn = document.getElementById('btnDetail');
+            panel.classList.toggle('hidden', false);
+            panel.classList.toggle('is-open', detailOpen);
+            btn.textContent = detailOpen ? '閉じる ▴' : '詳しく見る ▾';
         }
 
         function resetRune() {
             currentRune = null;
             isReversed = false;
+            detailOpen = false;
             document.getElementById('runeDisplay').classList.add('hidden');
             document.getElementById('consultBlock').classList.add('hidden');
             document.getElementById('intro').classList.remove('hidden');
+            document.getElementById('btnDetail').classList.add('hidden');
+            document.getElementById('btnDetail').textContent = '詳しく見る ▾';
+            const panel = document.getElementById('detailPanel');
+            panel.classList.remove('is-open');
+            panel.classList.add('hidden');
         }
 
         // Service Worker登録（PWA対応）
